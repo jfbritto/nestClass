@@ -1,0 +1,62 @@
+@baseUrl = http://localhost:3000
+
+### LISTA TODOS OS RECADOS
+
+GET {{baseUrl}}/recados?limit=20&offset=0
+Authorization: Bearer 123456
+
+### LISTA UM RECADO ESPECÍFICO
+GET {{baseUrl}}/recados/23
+
+### CRIA UM NOVO RECADO
+POST {{baseUrl}}/recados
+Content-Type: application/json
+
+{
+  "texto": "Teste de mensagem",
+  "deId": 17,
+  "paraId": 19
+}
+
+### ATUALIZA UM RECADO EXISTENTE
+PATCH {{baseUrl}}/recados/24
+Content-Type: application/json
+
+{
+  "lido": true
+}
+
+### DELETA UM RECADO EXISTENTE
+DELETE {{baseUrl}}/recados/23
+
+
+
+
+
+### LISTA TODOS AS PESSOAS
+
+GET {{baseUrl}}/pessoas?limit=20&offset=0
+
+### LISTA UMA PESSOA ESPECÍFICA
+GET {{baseUrl}}/pessoas/17
+
+### CRIA UMA NOVA PESSOA
+POST {{baseUrl}}/pessoas
+Content-Type: application/json
+
+{
+  "email": "mjocaccia3@example.com",
+  "password": "hashed_password",
+  "nome": "Marcos Jocaccia"
+}
+
+### ATUALIZA UMA PESSOA EXISTENTE
+PATCH {{baseUrl}}/pessoas/20
+Content-Type: application/json
+
+{
+  "nome": "Jocaccia da Silva"
+}
+
+### DELETA UMA PESSOA EXISTENTE
+DELETE {{baseUrl}}/pessoas/19
