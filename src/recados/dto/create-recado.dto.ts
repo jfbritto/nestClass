@@ -14,8 +14,5 @@ export class CreateRecadoDto {
   readonly texto: string;
 
   @IsPositive()
-  readonly deId: number;
-
-  @IsPositive()
   readonly paraId: number;
 }

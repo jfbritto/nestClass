@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Recado } from './entities/recado.entity';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
@@ -6,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PessoasService } from 'src/pessoas/pessoas.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 
 @Injectable()
 export class RecadosService {
@@ -54,9 +59,19 @@ export class RecadosService {
     return recado;
   }
 
-  async create(createRecadoDto: CreateRecadoDto) {
-    const de = await this.pessoaService.findOne(createRecadoDto.deId);
+  async create(
+    createRecadoDto: CreateRecadoDto,
+    tokenPayload: TokenPayloadDto,
+  ) {
+    console.log(tokenPayload);
     const para = await this.pessoaService.findOne(createRecadoDto.paraId);
+    const de = await this.pessoaService.findOne(tokenPayload.sub);
+
+    if (de.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem permissão para criar este recado',
+      );
+    }
 
     const newRecado = await this.recadoRepository.create({
       texto: createRecadoDto.texto,
@@ -71,15 +86,27 @@ export class RecadosService {
       ...newRecado,
       de: {
         id: newRecado.de.id,
+        nome: newRecado.de.nome,
       },
       para: {
         id: newRecado.para.id,
+        nome: newRecado.para.nome,
       },
     };
   }
 
-  async update(id: number, updateRecadoDto: UpdateRecadoDto) {
+  async update(
+    id: number,
+    updateRecadoDto: UpdateRecadoDto,
+    tokenPayload: TokenPayloadDto,
+  ) {
     const recado = await this.findOne(id);
+
+    if (recado.de.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atualizar este recado',
+      );
+    }
 
     recado.texto = updateRecadoDto?.texto ?? recado.texto;
     recado.lido = updateRecadoDto?.lido ?? recado.lido;
@@ -89,10 +116,14 @@ export class RecadosService {
     return recado;
   }
 
-  async remove(id: number) {
-    const result = await this.recadoRepository.delete(id);
-    if (result.affected === 0) {
-      this.throwNotFoundError();
+  async remove(id: number, tokenPayload: TokenPayloadDto) {
+    const recado = await this.findOne(id);
+    if (recado.de.id !== tokenPayload.sub) {
+      throw new NotFoundException(
+        'Você não tem permissão para deletar este recado',
+      );
     }
+
+    this.recadoRepository.remove(recado);
   }
 }

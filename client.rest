@@ -1,34 +1,39 @@
 @baseUrl = http://localhost:3000
+@authToken = {{authenticate.response.body.accessToken}}
+@refreshToken = {{authenticate.response.body.refreshToken}}
 
 ### LISTA TODOS OS RECADOS
 
 GET {{baseUrl}}/recados?limit=20&offset=0
-Authorization: Bearer 123456
+Authorization: Bearer {{authToken}}
 
 ### LISTA UM RECADO ESPECÍFICO
-GET {{baseUrl}}/recados/23
+GET {{baseUrl}}/recados/12
+Authorization: Bearer {{authToken}}
 
 ### CRIA UM NOVO RECADO
 POST {{baseUrl}}/recados
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
   "texto": "Teste de mensagem",
-  "deId": 17,
-  "paraId": 19
+  "paraId": 10
 }
 
 ### ATUALIZA UM RECADO EXISTENTE
-PATCH {{baseUrl}}/recados/24
+PATCH {{baseUrl}}/recados/12
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
+  "texto": "ooooopaaaaaasss",
   "lido": true
 }
 
 ### DELETA UM RECADO EXISTENTE
-DELETE {{baseUrl}}/recados/23
-
+DELETE {{baseUrl}}/recados/12
+Authorization: Bearer {{authToken}}
 
 
 
@@ -36,27 +41,75 @@ DELETE {{baseUrl}}/recados/23
 ### LISTA TODOS AS PESSOAS
 
 GET {{baseUrl}}/pessoas?limit=20&offset=0
+Authorization: Bearer {{authToken}}
 
 ### LISTA UMA PESSOA ESPECÍFICA
-GET {{baseUrl}}/pessoas/17
+GET {{baseUrl}}/pessoas/10
+Authorization: Bearer {{authToken}}
 
 ### CRIA UMA NOVA PESSOA
 POST {{baseUrl}}/pessoas
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "email": "mjocaccia3@example.com",
-  "password": "hashed_password",
-  "nome": "Marcos Jocaccia"
+  "email": "nest2.britto@hotmail.com",
+  "password": "12345678",
+  "nome": "João Britto"
 }
 
 ### ATUALIZA UMA PESSOA EXISTENTE
-PATCH {{baseUrl}}/pessoas/20
+PATCH {{baseUrl}}/pessoas/15
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "nome": "Jocaccia da Silva"
+  "nome": "jorge"
 }
 
 ### DELETA UMA PESSOA EXISTENTE
-DELETE {{baseUrl}}/pessoas/19
+DELETE {{baseUrl}}/pessoas/15
+Authorization: Bearer {{authToken}}
+
+
+
+
+### AUTHENTICAÇÃO DE USUÁRIO
+
+# @name authenticate
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "jf.britto@hotmail.com",
+  "password": "12345678"
+}
+
+### RE - AUTHENTICAÇÃO DE USUÁRIO
+
+# @name reAuthenticate
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+
+
+
+# Upload
+### Foto da pessoa
+POST {{baseUrl}}/pessoas/upload-picture/
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----BoundaryDelimitadorHttp
+
+------BoundaryDelimitadorHttp
+Content-Disposition: form-data; name="file"; filename="man.png"
+Content-Type: image/png
+
+< ./dev/images/man.png
+------BoundaryDelimitadorHttp--
+
+### ver foto da pessoa
+GET {{baseUrl}}/pictures/10.png

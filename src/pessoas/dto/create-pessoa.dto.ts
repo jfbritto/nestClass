@@ -5,16 +5,19 @@ export class CreatePessoaDto {
   @IsNotEmpty()
   @MinLength(5)
   @MaxLength(255)
-  readonly email: string;
+  email: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(5)
-  readonly password: string;
+  password: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(100)
-  readonly nome: string;
+  nome: string;
+
+  // @IsEnum(RoutePolicies, { each: true })
+  // routePolicies: RoutePolicies[];
 }

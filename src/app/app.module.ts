@@ -12,6 +12,9 @@ import { PessoasModule } from 'src/pessoas/pessoas.module';
 import { SimpleMiddleware } from 'src/common/middlewares/simple.middleware';
 import { OutroMiddleware } from 'src/common/middlewares/outro.middleware';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import * as path from 'path';
 // import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 // import { ErrorExceptionFilter } from 'src/common/filters/error-exception.filter';
 // import { IsAdminGuard } from 'src/common/guards/is-admin.guard';
@@ -29,8 +32,13 @@ import { ConfigModule } from '@nestjs/config';
       autoLoadEntities: Boolean(process.env.DB_AUTO_LOAD_ENTITIES),
       synchronize: Boolean(process.env.DB_SYNCHRONIZE), //sempre deve estar false em produção
     }),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve(__dirname, '..', '..', 'pictures'),
+      serveRoot: '/pictures',
+    }),
     RecadosModule,
     PessoasModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

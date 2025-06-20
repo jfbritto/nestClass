@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,12 +11,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Pessoa } from './entities/pessoa.entity';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { HashingService } from 'src/auth/hashing/hashing.service';
+import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 @Injectable()
 export class PessoasService {
   constructor(
     @InjectRepository(Pessoa)
     private readonly pessoaRepository: Repository<Pessoa>,
+    private readonly hashingService: HashingService,
   ) {}
 
   throwNotFoundError() {
@@ -24,9 +30,12 @@ export class PessoasService {
 
   async create(createPessoaDto: CreatePessoaDto) {
     try {
+      const passwordHash = await this.hashingService.hash(
+        createPessoaDto.password,
+      );
       const dadosPessoa = {
         nome: createPessoaDto.nome,
-        passwordHash: createPessoaDto.password,
+        passwordHash,
         email: createPessoaDto.email,
       };
 
@@ -62,12 +71,20 @@ export class PessoasService {
     return pessoa;
   }
 
-  async update(id: number, updatePessoaDto: UpdatePessoaDto) {
+  async update(
+    id: number,
+    updatePessoaDto: UpdatePessoaDto,
+    tokenPayload: TokenPayloadDto,
+  ) {
     const dadosPessoa = {
-      nome: updatePessoaDto.nome,
-      passwordHash: updatePessoaDto.password,
-      email: updatePessoaDto.email,
+      nome: updatePessoaDto?.nome,
     };
+
+    if (updatePessoaDto?.password) {
+      dadosPessoa['passwordHash'] = await this.hashingService.hash(
+        updatePessoaDto.password,
+      );
+    }
 
     const pessoa = await this.pessoaRepository.preload({
       id,
@@ -78,13 +95,52 @@ export class PessoasService {
       this.throwNotFoundError();
     }
 
+    if (pessoa.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atualizar esta pessoa',
+      );
+    }
+
     await this.pessoaRepository.save(pessoa);
   }
 
-  async remove(id: number) {
-    const result = await this.pessoaRepository.delete(id);
-    if (result.affected === 0) {
+  async remove(id: number, tokenPayload: TokenPayloadDto) {
+    const pessoa = await this.findOne(id);
+
+    if (pessoa.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atualizar esta pessoa',
+      );
+    }
+
+    return this.pessoaRepository.remove(pessoa);
+  }
+
+  async uploadPicture(
+    file: Express.Multer.File,
+    tokenPayload: TokenPayloadDto,
+  ) {
+    const pessoa = await this.findOne(tokenPayload.sub);
+    if (!pessoa) {
       this.throwNotFoundError();
     }
+    if (!file) {
+      throw new InternalServerErrorException('Arquivo não enviado');
+    }
+
+    const fileExtension = path
+      .extname(file.originalname)
+      .toLowerCase()
+      .substring(1);
+
+    const fileName = `${tokenPayload.sub}.${fileExtension}`;
+    const fileFullPath = path.resolve(process.cwd(), 'pictures', fileName);
+
+    await fs.writeFile(fileFullPath, file.buffer);
+
+    pessoa.picture = fileName;
+    await this.pessoaRepository.save(pessoa);
+
+    return pessoa;
   }
 }
