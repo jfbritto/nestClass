@@ -41,6 +41,8 @@ export class PessoasService {
 
       const novaPessoa = this.pessoaRepository.create(dadosPessoa);
       await this.pessoaRepository.save(novaPessoa);
+
+      delete novaPessoa.passwordHash;
       return novaPessoa;
     } catch (error) {
       if (error.code === '23505') {

@@ -12,6 +12,7 @@ import {
   UploadedFile,
   ParseFilePipeBuilder,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { PessoasService } from './pessoas.service';
 import { CreatePessoaDto } from './dto/create-pessoa.dto';
@@ -21,6 +22,7 @@ import { AuthTokenGuard } from 'src/auth/guards/auth-token.guard';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
 import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
+import { Request } from 'express';
 
 @Controller('pessoas')
 export class PessoasController {
@@ -49,8 +51,10 @@ export class PessoasController {
     @Param('id') id: number,
     @Body() updatePessoaDto: UpdatePessoaDto,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+    @Req() req: Request,
   ) {
-    return this.pessoasService.update(+id, updatePessoaDto, tokenPayload);
+    const payload = tokenPayload || (req as any).tokenPayload;
+    return this.pessoasService.update(+id, updatePessoaDto, payload);
   }
 
   @UseGuards(AuthTokenGuard)
@@ -58,8 +62,10 @@ export class PessoasController {
   remove(
     @Param('id') id: number,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+    @Req() req: Request,
   ) {
-    return this.pessoasService.remove(id, tokenPayload);
+    const payload = tokenPayload || (req as any).tokenPayload;
+    return this.pessoasService.remove(id, payload);
   }
 
   @UseGuards(AuthTokenGuard)
@@ -80,7 +86,9 @@ export class PessoasController {
     )
     file: Express.Multer.File,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+    @Req() req: Request,
   ) {
-    return this.pessoasService.uploadPicture(file, tokenPayload);
+    const payload = tokenPayload || (req as any).tokenPayload;
+    return this.pessoasService.uploadPicture(file, payload);
   }
 }

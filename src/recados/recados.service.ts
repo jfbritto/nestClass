@@ -63,7 +63,6 @@ export class RecadosService {
     createRecadoDto: CreateRecadoDto,
     tokenPayload: TokenPayloadDto,
   ) {
-    console.log(tokenPayload);
     const para = await this.pessoaService.findOne(createRecadoDto.paraId);
     const de = await this.pessoaService.findOne(tokenPayload.sub);
 

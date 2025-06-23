@@ -8,7 +8,7 @@ GET {{baseUrl}}/recados?limit=20&offset=0
 Authorization: Bearer {{authToken}}
 
 ### LISTA UM RECADO ESPECÍFICO
-GET {{baseUrl}}/recados/12
+GET {{baseUrl}}/recados/16
 Authorization: Bearer {{authToken}}
 
 ### CRIA UM NOVO RECADO
@@ -18,21 +18,21 @@ Content-Type: application/json
 
 {
   "texto": "Teste de mensagem",
-  "paraId": 10
+  "paraId": 85
 }
 
 ### ATUALIZA UM RECADO EXISTENTE
-PATCH {{baseUrl}}/recados/12
+PATCH {{baseUrl}}/recados/16
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "texto": "ooooopaaaaaasss",
-  "lido": true
+  "texto": "de joao pra joao",
+  "lido": false
 }
 
 ### DELETA UM RECADO EXISTENTE
-DELETE {{baseUrl}}/recados/12
+DELETE {{baseUrl}}/recados/17
 Authorization: Bearer {{authToken}}
 
 
@@ -44,7 +44,7 @@ GET {{baseUrl}}/pessoas?limit=20&offset=0
 Authorization: Bearer {{authToken}}
 
 ### LISTA UMA PESSOA ESPECÍFICA
-GET {{baseUrl}}/pessoas/10
+GET {{baseUrl}}/pessoas/86
 Authorization: Bearer {{authToken}}
 
 ### CRIA UMA NOVA PESSOA
@@ -53,22 +53,22 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "email": "nest2.britto@hotmail.com",
+  "email": "jf2.britto@hotmail.com",
   "password": "12345678",
   "nome": "João Britto"
 }
 
 ### ATUALIZA UMA PESSOA EXISTENTE
-PATCH {{baseUrl}}/pessoas/15
+PATCH {{baseUrl}}/pessoas/86
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "nome": "jorge"
+  "nome": "João Filipi Britto"
 }
 
 ### DELETA UMA PESSOA EXISTENTE
-DELETE {{baseUrl}}/pessoas/15
+DELETE {{baseUrl}}/pessoas/87
 Authorization: Bearer {{authToken}}
 
 
