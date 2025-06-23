@@ -2,13 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app/app.module';
 import { ParseIntIdPipe } from './common/pipes/parse-int-id.pipe';
-
-// import { AuthTokenInterceptor } from './common/interceptors/auth-token.interceptor';
-// import { AddHeaderInterceptor } from './common/interceptors/add-header.interceptor';
-// import { TimingConnectionInterceptor } from './common/interceptors/timing-connection.interceptor';
-// import { ErrorHandlingInterceptor } from './common/interceptors/error.handling.interceptor';
-// import { SimpleCacheInterceptor } from './common/interceptors/simple-cache.interceptor';
-// import { ChangeDataInterceptor } from './common/interceptors/change-data.interceptor';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,13 +16,15 @@ async function bootstrap() {
     new ParseIntIdPipe(),
   );
 
-  // app.useGlobalInterceptors(new AddHeaderInterceptor());
-  // app.useGlobalInterceptors(new TimingConnectionInterceptor());
-  // app.useGlobalInterceptors(new ErrorHandlingInterceptor());
-  // app.useGlobalInterceptors(new SimpleCacheInterceptor());
-  // app.useGlobalInterceptors(new ChangeDataInterceptor());
-  // app.useGlobalInterceptors(new AuthTokenInterceptor());
+  if (process.env.NODE_ENV === 'production') {
+    app.use(helmet());
+    app.enableCors({
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    });
+  }
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.APP_PORT);
 }
 bootstrap();

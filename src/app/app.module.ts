@@ -15,12 +15,20 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
-// import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-// import { ErrorExceptionFilter } from 'src/common/filters/error-exception.filter';
-// import { IsAdminGuard } from 'src/common/guards/is-admin.guard';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000, // 1 minuto
+          limit: 60, // 6 requests
+          blockDuration: 60000, // 1 minuto
+        },
+      ],
+    }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: process.env.DB_TYPE as any,
@@ -43,14 +51,10 @@ import * as path from 'path';
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: ErrorExceptionFilter, // Substitua pelo filtro de exceção que você deseja usar
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: IsAdminGuard, // Substitua pelo guard que você deseja usar
-    // }
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {
